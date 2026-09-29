@@ -536,10 +536,7 @@ body {
 /* Modal Drawer */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0; /* 100vh en Chrome móvil incluye la barra de URL y deja el fondo del modal fuera de pantalla */
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(6px);
   z-index: 200;
@@ -566,8 +563,11 @@ body {
   width: 100%;
   max-width: 550px;
   max-height: 88vh;
+  max-height: 88dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 20px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
   position: relative;
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
 }
@@ -724,6 +724,7 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-around;
   padding: 8px 0;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
   z-index: 150;
 }
 
@@ -996,3 +997,25 @@ input:checked + .slider:before {
   border: 1px solid rgba(100, 116, 139, 0.3);
 }
 
+
+/* Encabezado en móviles: la marca, la cuenta y los contadores no caben en una fila */
+@media (max-width: 599px) {
+  .header-top {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .brand-badge {
+    display: none;
+  }
+
+  .header-right-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .user-sync-pill {
+    max-width: 55%;
+    min-width: 0;
+  }
+}

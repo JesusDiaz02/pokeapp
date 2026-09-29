@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pokeapp-cache-v3';
+const CACHE_NAME = 'pokeapp-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,7 +6,9 @@ const ASSETS_TO_CACHE = [
   './pokemon_data.js',
   './firebase-config.js',
   './app.js',
-  './manifest.json'
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 // Instalación e instanciación del nuevo Service Worker

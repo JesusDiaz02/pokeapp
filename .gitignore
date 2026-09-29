@@ -13,3 +13,7 @@ Thumbs.db
 # Firebase
 .firebase/
 firebase-debug.log
+
+# Capturas de pantalla
+*.jpeg
+*.jpg

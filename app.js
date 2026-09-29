@@ -630,8 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modalBody.innerHTML = `
       <div class="auth-tabs">
         <button class="auth-tab-btn ${activeTab === 'google' ? 'active' : ''}" onclick="window.renderAuthTab('google')">Google</button>
-        <button class="auth-tab-btn ${activeTab === 'email' ? 'active' : ''}" onclick="window.renderAuthTab('email')">Correo / Clave</button>
-        <button class="auth-tab-btn ${activeTab === 'guest' ? 'active' : ''}" onclick="window.renderAuthTab('guest')">Invitado</button>
+        <!-- Correo / Clave e Invitado ocultos: solo Google está activado en Firebase Auth -->
         <button class="auth-tab-btn ${activeTab === 'config' ? 'active' : ''}" onclick="window.renderAuthTab('config')">Config Firebase</button>
       </div>
       <div id="auth-tab-content"></div>
