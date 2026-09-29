@@ -15,6 +15,7 @@
       "**/*.md",
       "**/*.jpeg",
       "**/*.jpg",
+      "Captura*",
       "**/node_modules/**"
     ]
   }
