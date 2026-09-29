@@ -2,12 +2,12 @@
 // Permite sincronización multinube con Firebase Authentication & Firestore
 
 const DEFAULT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDemoKey_PokeDexApp_ReplaceWithYourOwnIfNeeded",
-  authDomain: "pokedex-livingdex.firebaseapp.com",
-  projectId: "pokedex-livingdex",
-  storageBucket: "pokedex-livingdex.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef1234567890"
+  apiKey: "AIzaSyBHFIfXFTEwNDJLhx71MwhMg9dChydlDJ8",
+  authDomain: "pokeapp-94cd5.firebaseapp.com",
+  projectId: "pokeapp-94cd5",
+  storageBucket: "pokeapp-94cd5.firebasestorage.app",
+  messagingSenderId: "122669111433",
+  appId: "1:122669111433:web:ce092139c81757ade54e58"
 };
 
 // Cargar configuración guardada o la predeterminada

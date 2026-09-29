@@ -9,3 +9,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Firebase
+.firebase/
+firebase-debug.log
