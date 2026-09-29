@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#090d16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>PokéDex Living Dex & Shiny Tracker</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  
+  <!-- Favicon / Touch Icon -->
+  <link rel="icon" href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" type="image/png">
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand">
+        <div class="brand-icon"></div>
+        <span class="brand-title">PokéDex Living Dex</span>
+        <span class="brand-badge">Android PWA</span>
+      </div>
+      
+      <div class="header-right-actions">
+        <!-- Firebase Sync & User Pill -->
+        <button id="header-user-btn" class="user-sync-pill" onclick="window.openAuthModal()" title="Sincronizar dispositivos con Firebase">
+          <span id="sync-status-dot" class="sync-dot offline"></span>
+          <span id="user-display-name">Iniciar Sesión</span>
+        </button>
+
+        <div class="header-stats-mini">
+          <div class="stat-chip" title="Pokémon Únicos Atrapados">
+            <span>📖</span>
+            <strong id="stat-total-caught">0</strong>/1025
+          </div>
+          <div class="stat-chip shiny-chip" title="Shinies Registrados">
+            <span>✨</span>
+            <strong id="stat-total-shiny">0</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="search-filter-wrapper">
+      <div class="search-box">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar Pokémon por nombre o número (#25)..." autocomplete="off">
+      </div>
+      
+      <div id="quick-filters" class="quick-filters">
+        <!-- Dynamic filter chips will be generated here -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Views Container -->
+  <main class="main-content">
+    
+    <!-- 1. Dex Explorer View -->
+    <section id="view-dex" class="view-section active">
+      <div id="pokemon-grid" class="pokemon-grid">
+        <!-- Pokémon cards populated by app.js -->
+      </div>
+    </section>
+
+    <!-- 2. Captures Log View -->
+    <section id="view-captures" class="view-section">
+      <h2 style="font-size:1.1rem; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+        <span>📋 Historial de Capturas</span>
+      </h2>
+      <div id="captures-list" class="captures-list">
+        <!-- Logbook cards populated by app.js -->
+      </div>
+    </section>
+
+    <!-- 3. Shiny Dex View -->
+    <section id="view-shiny" class="view-section">
+      <h2 style="font-size:1.1rem; margin-bottom:14px; display:flex; align-items:center; gap:8px; color:var(--accent-gold);">
+        <span>✨ Galería Shiny Variocolor</span>
+      </h2>
+      <div id="shiny-grid" class="pokemon-grid">
+        <!-- Shiny cards populated by app.js -->
+      </div>
+    </section>
+
+    <!-- 4. Stats View -->
+    <section id="view-stats" class="view-section">
+      <h2 style="font-size:1.1rem; margin-bottom:14px;">📊 Estadísticas & Progreso</h2>
+      <div id="stats-container">
+        <!-- Stats visualizers populated by app.js -->
+      </div>
+    </section>
+
+    <!-- 5. Settings View -->
+    <section id="view-settings" class="view-section">
+      <h2 style="font-size:1.1rem; margin-bottom:14px;">⚙️ Ajustes & Respaldos</h2>
+      <div id="settings-container">
+        <!-- Settings populated by app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Touch Navigation Bar (Android Mobile App Style) -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="dex">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+      </svg>
+      <span>Pokédex</span>
+    </button>
+    
+    <button class="nav-item" data-view="captures">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+      </svg>
+      <span>Registros</span>
+    </button>
+
+    <button class="nav-item shiny-tab" data-view="shiny">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+      </svg>
+      <span>Shiny Dex</span>
+    </button>
+
+    <button class="nav-item" data-view="stats">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>
+      <span>Stats</span>
+    </button>
+
+    <button class="nav-item" data-view="settings">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <span>Ajustes</span>
+    </button>
+  </nav>
+
+  <!-- Slide-up Modal Overlay Drawer -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal-drawer">
+      <div class="modal-header">
+        <h3 id="modal-title" class="modal-title">Detalles de Pokémon</h3>
+        <button id="btn-close-modal" class="btn-close">&times;</button>
+      </div>
+      <div id="modal-body">
+        <!-- Modal form or info dynamically inserted by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="./firebase-config.js"></script>
+
+  <!-- Load Database and Application Scripts -->
+  <script src="./pokemon_data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
