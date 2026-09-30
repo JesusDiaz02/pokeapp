@@ -15,6 +15,7 @@
   --accent-gold: #ffd700;
   --accent-cyan: #00d2d3;
   --accent-purple: #a55eea;
+  --accent-alpha: #ff4757;
   
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -422,6 +423,74 @@ body {
   background: rgba(0, 210, 211, 0.15);
   border-color: var(--accent-cyan);
   color: var(--accent-cyan);
+}
+
+/* Card footer: info (captures) + quick add */
+.card-actions {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.card-actions .btn-quick-add {
+  margin-top: 0;
+  flex: 1;
+}
+
+.btn-card-info {
+  flex-shrink: 0;
+  width: 30px;
+  background: rgba(0, 210, 211, 0.1);
+  border: 1px solid rgba(0, 210, 211, 0.35);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-card-info:hover {
+  background: rgba(0, 210, 211, 0.25);
+  border-color: var(--accent-cyan);
+}
+
+/* Regional form & Alpha markers */
+.form-badge {
+  position: absolute;
+  top: 30px;
+  left: 10px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--accent-purple);
+  background: rgba(165, 94, 234, 0.15);
+  border: 1px solid rgba(165, 94, 234, 0.4);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+}
+
+.alpha-badge {
+  background: var(--accent-alpha);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+}
+
+.alpha-chip {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-alpha);
+  background: rgba(255, 71, 87, 0.15);
+  border: 1px solid rgba(255, 71, 87, 0.4);
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  vertical-align: middle;
 }
 
 /* Type Colors */

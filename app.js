@@ -6,8 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let searchTerm = '';
   let activeGenFilter = 'ALL';
   let activeGameFilter = 'ALL';
-  let activeStatusFilter = 'ALL'; // ALL, CAUGHT, SHINY, UNCAUGHT
+  let activeStatusFilter = 'ALL'; // ALL, CAUGHT, SHINY, ALPHA, UNCAUGHT
   let activePokemonId = null;
+
+  // Lookup by id (base species 1-1025 and regional forms 10000+)
+  const DB_BY_ID = {};
+  (window.POKEMON_DATABASE || []).forEach(p => DB_BY_ID[p.id] = p);
+  const speciesOf = (pokemonId) => (DB_BY_ID[pokemonId] && DB_BY_ID[pokemonId].dexNumber) || pokemonId;
+  const dexLabel = (pkmn) => `#${String(pkmn.dexNumber || pkmn.id).padStart(3, '0')}`;
 
   // Firebase Auth & Firestore Sync State
   let currentUser = null;
@@ -236,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateHeaderStats() {
-    const uniqueCaughtCount = new Set(captures.map(c => c.pokemonId)).size;
+    const uniqueCaughtCount = new Set(captures.map(c => speciesOf(c.pokemonId))).size;
     const totalShinies = captures.filter(c => c.isShiny).length;
     if (statTotalCaught) statTotalCaught.textContent = uniqueCaughtCount;
     if (statTotalShiny) statTotalShiny.textContent = totalShinies;
@@ -251,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'ALL', label: 'Todos' },
       { id: 'CAUGHT', label: 'Atrapados ✅' },
       { id: 'SHINY', label: 'Shinies ✨', isShiny: true },
+      { id: 'ALPHA', label: 'Alfas α' },
       { id: 'UNCAUGHT', label: 'Faltantes ❓' },
       { id: 'Gen 1', label: 'Gen 1 (Kanto)' },
       { id: 'Gen 2', label: 'Gen 2 (Johto)' },
@@ -272,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        if (opt.id === 'ALL' || opt.id === 'CAUGHT' || opt.id === 'SHINY' || opt.id === 'UNCAUGHT') {
+        if (opt.id === 'ALL' || opt.id === 'CAUGHT' || opt.id === 'SHINY' || opt.id === 'ALPHA' || opt.id === 'UNCAUGHT') {
           activeStatusFilter = opt.id;
           activeGenFilter = 'ALL';
         } else {
@@ -296,13 +303,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtered = db.filter(pkmn => {
       // Search term filter
       if (searchTerm) {
-        const matchesName = pkmn.name.toLowerCase().includes(searchTerm);
-        const matchesId = pkmn.id.toString() === searchTerm || `#${pkmn.id}` === searchTerm;
+        const matchesName = pkmn.name.toLowerCase().includes(searchTerm) ||
+          (pkmn.form && pkmn.form.toLowerCase().includes(searchTerm));
+        const num = String(pkmn.dexNumber || pkmn.id);
+        const matchesId = num === searchTerm || `#${num}` === searchTerm;
         if (!matchesName && !matchesId) return false;
       }
 
       // Gen filter
-      if (activeGenFilter !== 'ALL' && !pkmn.gen.includes(activeGenFilter)) {
+      // Regional forms show under both their species' gen and the gen they debuted in
+      if (activeGenFilter !== 'ALL' && pkmn.gen !== activeGenFilter && pkmn.formGen !== activeGenFilter) {
         return false;
       }
 
@@ -313,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (activeStatusFilter === 'CAUGHT' && !isCaught) return false;
       if (activeStatusFilter === 'SHINY' && !hasShiny) return false;
+      if (activeStatusFilter === 'ALPHA' && !userCaptures.some(c => c.isAlpha)) return false;
       if (activeStatusFilter === 'UNCAUGHT' && isCaught) return false;
 
       return true;
@@ -332,26 +343,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const userCaptures = capturesByPokemon[pkmn.id] || [];
       const isCaught = userCaptures.length > 0;
       const hasShiny = userCaptures.some(c => c.isShiny);
+      const hasAlpha = userCaptures.some(c => c.isAlpha);
 
       const card = document.createElement('div');
       card.className = `pokemon-card ${isCaught ? 'caught' : 'uncaught'} ${hasShiny ? 'has-shiny' : ''}`;
-      
-      const displayImg = (hasShiny && userCaptures.find(c => c.isShiny)) ? pkmn.shiny_sprite : pkmn.sprite;
 
-      const gamesBadgeHtml = userCaptures.map(c => `
-        <span class="game-tag ${c.isShiny ? 'shiny-tag' : ''}">
-          ${c.game} ${c.isShiny ? '✨' : ''}
-        </span>
-      `).join('');
+      const displayImg = hasShiny ? pkmn.shiny_sprite : pkmn.sprite;
 
       card.innerHTML = `
         <div class="card-top-bar">
-          <span class="dex-number">#${String(pkmn.id).padStart(3, '0')}</span>
+          <span class="dex-number">${dexLabel(pkmn)}</span>
           <div class="card-badges">
+            ${hasAlpha ? '<span class="alpha-badge" title="Alfa registrado">α</span>' : ''}
             ${hasShiny ? '<span class="shiny-sparkle-badge" title="Shiny registrado!">✨</span>' : ''}
             ${userCaptures.length > 0 ? `<span class="count-badge">${userCaptures.length}</span>` : ''}
           </div>
         </div>
+        ${pkmn.form ? `<span class="form-badge">${pkmn.form}</span>` : ''}
         <div class="pokemon-img-wrapper">
           <img src="${displayImg}" alt="${pkmn.name}" class="pokemon-img" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';">
         </div>
@@ -359,10 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="types-container">
           ${pkmn.types.map(t => `<span class="type-pill type-${t.toLowerCase()}">${t}</span>`).join('')}
         </div>
-        ${gamesBadgeHtml ? `<div class="game-tags-list">${gamesBadgeHtml}</div>` : ''}
-        <button class="btn-quick-add" onclick="event.stopPropagation(); window.openAddCaptureModal(${pkmn.id})">
-          + Registrar Captura
-        </button>
+        <div class="card-actions">
+          ${isCaught ? `<button class="btn-card-info" title="Ver capturas" onclick="event.stopPropagation(); window.openPokemonDetails(${pkmn.id})">ℹ️</button>` : ''}
+          <button class="btn-quick-add" onclick="event.stopPropagation(); window.openAddCaptureModal(${pkmn.id})">
+            + Registrar Captura
+          </button>
+        </div>
       `;
 
       card.addEventListener('click', () => {
@@ -404,6 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="capture-info">
             <h4>
               ${cap.pokemonName} ${cap.isShiny ? '<span style="color:var(--accent-gold);">✨ (Shiny)</span>' : ''}
+              ${cap.isAlpha ? '<span class="alpha-chip">α Alfa</span>' : ''}
               ${cap.nickname ? `<span style="font-weight:normal; font-style:italic; font-size:0.8rem;">"${cap.nickname}"</span>` : ''}
             </h4>
             <p>Atrapado en: <strong style="color:var(--accent-cyan);">${cap.game}</strong></p>
@@ -417,6 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
         <div class="capture-actions">
+          <button class="btn-icon" onclick="window.openAddCaptureModal(${cap.pokemonId}, '${cap.id}')" title="Editar registro">✏️</button>
           <button class="btn-icon" onclick="window.deleteCapture('${cap.id}')" title="Eliminar registro">🗑️</button>
         </div>
       `;
@@ -449,8 +461,8 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'pokemon-card has-shiny';
       card.innerHTML = `
         <div class="card-top-bar">
-          <span class="dex-number">#${String(cap.pokemonId).padStart(3, '0')}</span>
-          <span class="shiny-sparkle-badge">✨</span>
+          <span class="dex-number">#${String(speciesOf(cap.pokemonId)).padStart(3, '0')}</span>
+          <span class="shiny-sparkle-badge">${cap.isAlpha ? 'α ' : ''}✨</span>
         </div>
         <div class="pokemon-img-wrapper">
           <img src="${pkmn.shiny_sprite || pkmn.sprite}" alt="${cap.pokemonName}" class="pokemon-img">
@@ -468,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!statsContainer) return;
 
     const totalPokemonCount = 1025;
-    const uniqueCaught = new Set(captures.map(c => c.pokemonId)).size;
+    const uniqueCaught = new Set(captures.map(c => speciesOf(c.pokemonId))).size;
     const totalShinies = captures.filter(c => c.isShiny).length;
     const dexPercent = ((uniqueCaught / totalPokemonCount) * 100).toFixed(1);
 
@@ -800,12 +812,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // -------------------------------------------------------------
   // CAPTURES MANAGEMENT & MODALS
   // -------------------------------------------------------------
-  window.openAddCaptureModal = function(pokemonId) {
+  window.openAddCaptureModal = function(pokemonId, editCaptureId = null) {
     activePokemonId = pokemonId;
-    const db = window.POKEMON_DATABASE || [];
-    const pkmn = db.find(p => p.id === pokemonId) || { name: `Pokémon #${pokemonId}` };
+    const pkmn = DB_BY_ID[pokemonId] || { id: pokemonId, name: `Pokémon #${pokemonId}` };
+    const editing = editCaptureId ? captures.find(c => c.id === editCaptureId) : null;
 
-    modalTitle.textContent = `Registrar Captura: ${pkmn.name} (#${pokemonId})`;
+    modalTitle.textContent = `${editing ? 'Editar' : 'Registrar'} Captura: ${pkmn.name} (${dexLabel(pkmn)})`;
     
     let gamesOptions = '';
     const gamesDb = window.GAMES_DATABASE || {};
@@ -834,6 +846,16 @@ document.addEventListener('DOMContentLoaded', () => {
             <span style="font-size:0.9rem; font-weight:600; color:var(--accent-gold);">✨ ¿Es Variocolor (Shiny)?</span>
             <label class="toggle-switch">
               <input type="checkbox" id="form-shiny">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="toggle-group">
+            <span style="font-size:0.9rem; font-weight:600; color:var(--accent-alpha);">α ¿Es Alfa?</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="form-alpha">
               <span class="slider"></span>
             </label>
           </div>
@@ -878,28 +900,46 @@ document.addEventListener('DOMContentLoaded', () => {
           <textarea class="form-control" id="form-notes" rows="2" placeholder="Lugar de captura, evento, Tera Tipo, etc..."></textarea>
         </div>
 
-        <button type="submit" class="btn-primary">💾 Guardar Captura</button>
+        <button type="submit" class="btn-primary">💾 ${editing ? 'Guardar Cambios' : 'Guardar Captura'}</button>
       </form>
     `;
+
+    if (editing) {
+      const setVal = (elId, val) => { if (val !== null && val !== undefined) document.getElementById(elId).value = val; };
+      setVal('form-game', editing.game);
+      setVal('form-ball', editing.ball);
+      setVal('form-level', editing.level);
+      setVal('form-nature', editing.nature);
+      setVal('form-ability', editing.ability);
+      setVal('form-nickname', editing.nickname);
+      setVal('form-notes', editing.notes);
+      document.getElementById('form-shiny').checked = !!editing.isShiny;
+      document.getElementById('form-alpha').checked = !!editing.isAlpha;
+    }
 
     document.getElementById('add-capture-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const newCapture = {
-        id: 'cap_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        id: editing ? editing.id : 'cap_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         pokemonId: pkmn.id,
         pokemonName: pkmn.name,
         game: document.getElementById('form-game').value,
         isShiny: document.getElementById('form-shiny').checked,
+        isAlpha: document.getElementById('form-alpha').checked,
         ball: document.getElementById('form-ball').value,
         level: document.getElementById('form-level').value || null,
         nature: document.getElementById('form-nature').value || null,
         ability: document.getElementById('form-ability').value.trim() || null,
         nickname: document.getElementById('form-nickname').value.trim() || null,
         notes: document.getElementById('form-notes').value.trim() || null,
-        date: new Date().toISOString().split('T')[0]
+        date: (editing && editing.date) || new Date().toISOString().split('T')[0]
       };
 
-      captures.push(newCapture);
+      if (editing) {
+        captures = captures.map(c => c.id === editing.id ? newCapture : c);
+      } else {
+        captures.push(newCapture);
+      }
       saveLocalCapturesSilently();
       saveSingleCaptureToFirestore(newCapture);
       closeModal();
@@ -909,21 +949,29 @@ document.addEventListener('DOMContentLoaded', () => {
     openModal();
   };
 
+  window.openPokemonDetails = function(pokemonId) {
+    if (DB_BY_ID[pokemonId]) openPokemonDetailsModal(DB_BY_ID[pokemonId]);
+  };
+
   function openPokemonDetailsModal(pkmn) {
     const userCaptures = captures.filter(c => c.pokemonId === pkmn.id);
-    modalTitle.textContent = `#${String(pkmn.id).padStart(3, '0')} - ${pkmn.name}`;
+    modalTitle.textContent = `${dexLabel(pkmn)} - ${pkmn.name}`;
 
     const capturesHtml = userCaptures.map(c => `
       <div class="capture-item-card ${c.isShiny ? 'is-shiny' : ''}" style="margin-bottom:8px;">
         <div>
           <div style="font-weight:700; color:var(--text-primary);">
             🎮 ${c.game} ${c.isShiny ? '<span style="color:var(--accent-gold);">✨ Shiny</span>' : ''}
+            ${c.isAlpha ? '<span class="alpha-chip">α Alfa</span>' : ''}
           </div>
           <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">
             ⚽ ${c.ball} | ${c.nickname ? `Apodo: "${c.nickname}" |` : ''} ${c.notes || ''}
           </div>
         </div>
-        <button class="btn-icon" onclick="window.deleteCapture('${c.id}')">🗑️</button>
+        <div class="capture-actions">
+          <button class="btn-icon" onclick="window.openAddCaptureModal(${c.pokemonId}, '${c.id}')" title="Editar registro">✏️</button>
+          <button class="btn-icon" onclick="window.deleteCapture('${c.id}')" title="Eliminar registro">🗑️</button>
+        </div>
       </div>
     `).join('') || '<p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">Sin capturas en tus juegos todavía.</p>';
 
@@ -933,7 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="display:flex; gap:6px; justify-content:center; margin-top:8px;">
           ${pkmn.types.map(t => `<span class="type-pill type-${t.toLowerCase()}">${t}</span>`).join('')}
         </div>
-        <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">Región: ${pkmn.region} (${pkmn.gen})</div>
+        <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">Región: ${pkmn.region} (${pkmn.formGen || pkmn.gen})</div>
       </div>
 
       <div style="margin-bottom:16px;">

@@ -1071,7 +1071,75 @@ const KNOWN_POKEMON = {
   1025: { name: "Pecharunt", types: ["Poison", "Ghost"] }
 };
 
-// Generate list of 1025 Pokemon
+const REGIONAL_FORMS = [
+  { id: 10091, species: 19, name: "Alolan Rattata", region: "Alola", types: ["Dark", "Normal"] },
+  { id: 10092, species: 20, name: "Alolan Raticate", region: "Alola", types: ["Dark", "Normal"] },
+  { id: 10100, species: 26, name: "Alolan Raichu", region: "Alola", types: ["Electric", "Psychic"] },
+  { id: 10101, species: 27, name: "Alolan Sandshrew", region: "Alola", types: ["Ice", "Steel"] },
+  { id: 10102, species: 28, name: "Alolan Sandslash", region: "Alola", types: ["Ice", "Steel"] },
+  { id: 10103, species: 37, name: "Alolan Vulpix", region: "Alola", types: ["Ice"] },
+  { id: 10104, species: 38, name: "Alolan Ninetales", region: "Alola", types: ["Ice", "Fairy"] },
+  { id: 10105, species: 50, name: "Alolan Diglett", region: "Alola", types: ["Ground", "Steel"] },
+  { id: 10106, species: 51, name: "Alolan Dugtrio", region: "Alola", types: ["Ground", "Steel"] },
+  { id: 10107, species: 52, name: "Alolan Meowth", region: "Alola", types: ["Dark"] },
+  { id: 10108, species: 53, name: "Alolan Persian", region: "Alola", types: ["Dark"] },
+  { id: 10109, species: 74, name: "Alolan Geodude", region: "Alola", types: ["Rock", "Electric"] },
+  { id: 10110, species: 75, name: "Alolan Graveler", region: "Alola", types: ["Rock", "Electric"] },
+  { id: 10111, species: 76, name: "Alolan Golem", region: "Alola", types: ["Rock", "Electric"] },
+  { id: 10112, species: 88, name: "Alolan Grimer", region: "Alola", types: ["Poison", "Dark"] },
+  { id: 10113, species: 89, name: "Alolan Muk", region: "Alola", types: ["Poison", "Dark"] },
+  { id: 10114, species: 103, name: "Alolan Exeggutor", region: "Alola", types: ["Grass", "Dragon"] },
+  { id: 10115, species: 105, name: "Alolan Marowak", region: "Alola", types: ["Fire", "Ghost"] },
+  { id: 10161, species: 52, name: "Galarian Meowth", region: "Galar", types: ["Steel"] },
+  { id: 10162, species: 77, name: "Galarian Ponyta", region: "Galar", types: ["Psychic"] },
+  { id: 10163, species: 78, name: "Galarian Rapidash", region: "Galar", types: ["Psychic", "Fairy"] },
+  { id: 10164, species: 79, name: "Galarian Slowpoke", region: "Galar", types: ["Psychic"] },
+  { id: 10165, species: 80, name: "Galarian Slowbro", region: "Galar", types: ["Poison", "Psychic"] },
+  { id: 10166, species: 83, name: "Galarian Farfetch’d", region: "Galar", types: ["Fighting"] },
+  { id: 10167, species: 110, name: "Galarian Weezing", region: "Galar", types: ["Poison", "Fairy"] },
+  { id: 10168, species: 122, name: "Galarian Mr. Mime", region: "Galar", types: ["Ice", "Psychic"] },
+  { id: 10169, species: 144, name: "Galarian Articuno", region: "Galar", types: ["Psychic", "Flying"] },
+  { id: 10170, species: 145, name: "Galarian Zapdos", region: "Galar", types: ["Fighting", "Flying"] },
+  { id: 10171, species: 146, name: "Galarian Moltres", region: "Galar", types: ["Dark", "Flying"] },
+  { id: 10172, species: 199, name: "Galarian Slowking", region: "Galar", types: ["Poison", "Psychic"] },
+  { id: 10173, species: 222, name: "Galarian Corsola", region: "Galar", types: ["Ghost"] },
+  { id: 10174, species: 263, name: "Galarian Zigzagoon", region: "Galar", types: ["Dark", "Normal"] },
+  { id: 10175, species: 264, name: "Galarian Linoone", region: "Galar", types: ["Dark", "Normal"] },
+  { id: 10176, species: 554, name: "Galarian Darumaka", region: "Galar", types: ["Ice"] },
+  { id: 10177, species: 555, name: "Galarian Darmanitan", region: "Galar", types: ["Ice"] },
+  { id: 10179, species: 562, name: "Galarian Yamask", region: "Galar", types: ["Ground", "Ghost"] },
+  { id: 10180, species: 618, name: "Galarian Stunfisk", region: "Galar", types: ["Ground", "Steel"] },
+  { id: 10229, species: 58, name: "Hisuian Growlithe", region: "Hisui", types: ["Fire", "Rock"] },
+  { id: 10230, species: 59, name: "Hisuian Arcanine", region: "Hisui", types: ["Fire", "Rock"] },
+  { id: 10231, species: 100, name: "Hisuian Voltorb", region: "Hisui", types: ["Electric", "Grass"] },
+  { id: 10232, species: 101, name: "Hisuian Electrode", region: "Hisui", types: ["Electric", "Grass"] },
+  { id: 10233, species: 157, name: "Hisuian Typhlosion", region: "Hisui", types: ["Fire", "Ghost"] },
+  { id: 10234, species: 211, name: "Hisuian Qwilfish", region: "Hisui", types: ["Dark", "Poison"] },
+  { id: 10235, species: 215, name: "Hisuian Sneasel", region: "Hisui", types: ["Fighting", "Poison"] },
+  { id: 10236, species: 503, name: "Hisuian Samurott", region: "Hisui", types: ["Water", "Dark"] },
+  { id: 10237, species: 549, name: "Hisuian Lilligant", region: "Hisui", types: ["Grass", "Fighting"] },
+  { id: 10238, species: 570, name: "Hisuian Zorua", region: "Hisui", types: ["Normal", "Ghost"] },
+  { id: 10239, species: 571, name: "Hisuian Zoroark", region: "Hisui", types: ["Normal", "Ghost"] },
+  { id: 10240, species: 628, name: "Hisuian Braviary", region: "Hisui", types: ["Psychic", "Flying"] },
+  { id: 10241, species: 705, name: "Hisuian Sliggoo", region: "Hisui", types: ["Steel", "Dragon"] },
+  { id: 10242, species: 706, name: "Hisuian Goodra", region: "Hisui", types: ["Steel", "Dragon"] },
+  { id: 10243, species: 713, name: "Hisuian Avalugg", region: "Hisui", types: ["Ice", "Rock"] },
+  { id: 10244, species: 724, name: "Hisuian Decidueye", region: "Hisui", types: ["Grass", "Fighting"] },
+  { id: 10250, species: 128, name: "Paldean Tauros (Combat Breed)", region: "Paldea", types: ["Fighting"] },
+  { id: 10251, species: 128, name: "Paldean Tauros (Blaze Breed)", region: "Paldea", types: ["Fighting", "Fire"] },
+  { id: 10252, species: 128, name: "Paldean Tauros (Aqua Breed)", region: "Paldea", types: ["Fighting", "Water"] },
+  { id: 10253, species: 194, name: "Paldean Wooper", region: "Paldea", types: ["Poison", "Ground"] }
+];
+
+// Generate list of 1025 Pokemon (+ regional forms right after their base species)
+const FORM_GEN = { Alola: "Gen 7", Galar: "Gen 8", Hisui: "Gen 8", Paldea: "Gen 9" };
+const spriteUrls = (id) => ({
+  sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+  artwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+  shiny_sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`,
+  shiny_artwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`
+});
+
 const db = [];
 for (let i = 1; i <= 1025; i++) {
   const info = getGenInfo(i);
@@ -1081,14 +1149,26 @@ for (let i = 1; i <= 1025; i++) {
 
   db.push({
     id: i,
+    dexNumber: i,
     name: name,
     types: types,
     gen: info.gen,
     region: info.region,
-    sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i}.png`,
-    artwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i}.png`,
-    shiny_sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png`,
-    shiny_artwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${i}.png`
+    ...spriteUrls(i)
+  });
+
+  REGIONAL_FORMS.filter(f => f.species === i).forEach(f => {
+    db.push({
+      id: f.id,
+      dexNumber: i,
+      name: f.name,
+      form: f.region,
+      types: f.types,
+      gen: info.gen,
+      formGen: FORM_GEN[f.region],
+      region: f.region,
+      ...spriteUrls(f.id)
+    });
   });
 }
 
