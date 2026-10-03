@@ -577,6 +577,28 @@ body {
   color: var(--text-secondary);
 }
 
+.ball-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  vertical-align: middle;
+  image-rendering: pixelated;
+  margin: -4px 0;
+}
+
+.ball-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ball-select .ball-icon {
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
 .capture-actions {
   display: flex;
   gap: 6px;

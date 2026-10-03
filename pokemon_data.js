@@ -19,8 +19,17 @@ window.POKEBALLS = [
   "Net Ball", "Nest Ball", "Repeat Ball", "Timer Ball", "Dive Ball",
   "Dusk Ball", "Heal Ball", "Quick Ball", "Cherish Ball", "Dream Ball",
   "Beast Ball", "Strange Ball", "Feather Ball", "Wing Ball", "Jet Ball",
-  "Gigaton Ball", "Origin Ball"
+  "Leaden Ball", "Gigaton Ball", "Origin Ball"
 ];
+
+// Ball icon from PokeAPI item sprites ("Ultra Ball" -> ultra-ball.png).
+// Legends: Arceus balls are stored with an "la" prefix (lafeather-ball.png).
+const HISUI_BALLS = ["Strange Ball", "Feather Ball", "Wing Ball", "Jet Ball", "Leaden Ball", "Gigaton Ball", "Origin Ball"];
+window.getBallSprite = function(ballName) {
+  const name = ballName || "Poké Ball";
+  const slug = name.toLowerCase().replace(/é/g, "e").replace(/\s+/g, "-");
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${HISUI_BALLS.includes(name) ? "la" : ""}${slug}.png`;
+};
 
 window.NATURES = [
   "Adamant", "Bashful", "Bold", "Brave", "Calm", "Careful", "Docile",

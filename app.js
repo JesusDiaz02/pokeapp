@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   (window.POKEMON_DATABASE || []).forEach(p => DB_BY_ID[p.id] = p);
   const speciesOf = (pokemonId) => (DB_BY_ID[pokemonId] && DB_BY_ID[pokemonId].dexNumber) || pokemonId;
   const dexLabel = (pkmn) => `#${String(pkmn.dexNumber || pkmn.id).padStart(3, '0')}`;
+  const ballIcon = (ball) => `<img src="${window.getBallSprite(ball)}" alt="" class="ball-icon" onerror="this.style.display='none'">`;
 
   // Firebase Auth & Firestore Sync State
   let currentUser = null;
@@ -419,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </h4>
             <p>Atrapado en: <strong style="color:var(--accent-cyan);">${cap.game}</strong></p>
             <div class="capture-meta">
-              <span class="meta-chip">⚽ ${cap.ball || 'Poké Ball'}</span>
+              <span class="meta-chip">${ballIcon(cap.ball)} ${cap.ball || 'Poké Ball'}</span>
               ${cap.level ? `<span class="meta-chip">Nvl. ${cap.level}</span>` : ''}
               ${cap.nature ? `<span class="meta-chip">Naturaleza ${cap.nature}</span>` : ''}
               ${cap.ability ? `<span class="meta-chip">Habilidad: ${cap.ability}</span>` : ''}
@@ -864,9 +865,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="form-row">
           <div class="form-group">
             <label>Pokéball usada</label>
-            <select class="form-control" id="form-ball">
-              ${ballsOptions}
-            </select>
+            <div class="ball-select">
+              <img id="form-ball-icon" src="${window.getBallSprite()}" alt="" class="ball-icon">
+              <select class="form-control" id="form-ball">
+                ${ballsOptions}
+              </select>
+            </div>
           </div>
 
           <div class="form-group">
@@ -917,6 +921,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('form-alpha').checked = !!editing.isAlpha;
     }
 
+    const ballSelect = document.getElementById('form-ball');
+    const updateBallIcon = () => { document.getElementById('form-ball-icon').src = window.getBallSprite(ballSelect.value); };
+    ballSelect.addEventListener('change', updateBallIcon);
+    updateBallIcon();
+
     document.getElementById('add-capture-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const newCapture = {
@@ -965,7 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${c.isAlpha ? '<span class="alpha-chip">α Alfa</span>' : ''}
           </div>
           <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">
-            ⚽ ${c.ball} | ${c.nickname ? `Apodo: "${c.nickname}" |` : ''} ${c.notes || ''}
+            ${ballIcon(c.ball)} ${[c.ball || 'Poké Ball', c.nickname ? `Apodo: "${c.nickname}"` : '', c.notes || ''].filter(Boolean).join(' | ')}
           </div>
         </div>
         <div class="capture-actions">
